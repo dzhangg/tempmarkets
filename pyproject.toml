@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tempmarkets"
+version = "0.1.0"
+description = "Probabilistic daily max-temperature forecasts vs. prediction market prices (read-only analysis + paper log)"
+requires-python = ">=3.9"
+dependencies = [
+  "pandas>=2.0",
+  "pyarrow",
+  "numpy",
+  "scipy",
+  "requests",
+  "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+models = ["statsmodels", "scikit-learn", "properscoring", "matplotlib"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["network: hits live APIs (deselect with -m 'not network')"]

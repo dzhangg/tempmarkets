@@ -1,0 +1,17 @@
+# Stations under study. `iem_id` is the 3-letter id the IEM ASOS endpoint expects.
+# `series_slug` is the Polymarket Gamma series for that city's daily max-temp markets.
+# Study set: KMIA, KLGA, KDAL, KATL. Entries marked candidate: true are probed in M0 but not analysed.
+stations:
+  KMIA: {iem_id: MIA, tz: America/New_York, lat: 25.788, lon: -80.317, series_slug: miami-daily-weather}
+  KLGA: {iem_id: LGA, tz: America/New_York, lat: 40.779, lon: -73.880, series_slug: nyc-daily-weather}
+  KORD: {iem_id: ORD, tz: America/Chicago, lat: 41.960, lon: -87.932, series_slug: chicago-daily-weather, candidate: true}
+  KDAL: {iem_id: DAL, tz: America/Chicago, lat: 32.852, lon: -96.856, series_slug: dallas-daily-weather}
+  KATL: {iem_id: ATL, tz: America/New_York, lat: 33.630, lon: -84.442, series_slug: atlanta-daily-weather}
+  KAUS: {iem_id: AUS, tz: America/Chicago, lat: 30.183, lon: -97.680, series_slug: austin-daily-weather, candidate: true}
+
+# Settlement-rule eras, read from Polymarket rule text on 2026-11-03 (KMIA and KLGA).
+# Dates are the market's observation date (local). Re-verify per station in M0/M1.
+eras:
+  - {name: wu,     start: 2025-01-01, end: 2026-08-22, desc: "Weather Underground Daily Observations max, whole F (METAR+SPECI)"}
+  - {name: nws_ts, start: 2026-08-23, end: 2026-10-22, desc: "weather.gov/wrh/timeseries Temp column max, whole F"}
+  - {name: metar,  start: 2026-10-23, end: null,       desc: "Routine METAR only (no SPECI), T-group tenths C (else body whole C) -> F, round half up"}
