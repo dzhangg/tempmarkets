@@ -51,6 +51,16 @@ def bucket_for(value: int, buckets: Sequence[Bucket]) -> Optional[Bucket]:
     return hits[0] if hits else None
 
 
+def bucket_probs(support: Sequence[int], pmf: Sequence[float], buckets: Sequence[Bucket]) -> dict[str, float]:
+    """Sum an integer pmf (one row) into market buckets. Buckets must tile the integers."""
+    out = {b.label: 0.0 for b in buckets}
+    for k, p in zip(support, pmf):
+        b = bucket_for(int(k), buckets)
+        if b is not None:
+            out[b.label] += float(p)
+    return out
+
+
 def check_partition(buckets: Sequence[Bucket]) -> None:
     """Assert buckets tile the integers with no gaps or overlaps."""
     bs = sorted(buckets, key=lambda b: b.lo)

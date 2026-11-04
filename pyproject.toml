@@ -14,11 +14,12 @@ dependencies = [
   "scipy",
   "requests",
   "pyyaml",
+  "statsmodels",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest"]
-models = ["statsmodels", "scikit-learn", "properscoring", "matplotlib"]
+plots = ["matplotlib"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

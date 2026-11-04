@@ -18,6 +18,7 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 | `03_gap_analysis.py` | CLI vs. market max → `reports/m1_gaps.md` | seconds |
 | `04_fetch_forecasts.py` | NBM (NBS) + GFS MOS archives → `data/raw/mos/` (paced for IEM's rate limit) | ~12 min |
 | `05_build_features.py` | leak-free feature table + raw skill → `reports/m2_forecasts.md` | ~2 min |
+| `06_fit_models.py` | monthly-refit out-of-sample distributions (raw NBM, baseline, EMOS, QR) → `data/processed/predictions.parquet`, `reports/m3_models.md` | ~8 min |
 
 Downloads are cached. Re-runs only re-fetch the current year.
 
@@ -40,6 +41,7 @@ Polymarket's rule text for these markets has three eras (confirmed for KMIA, KLG
   - Checkpoints: D-1 18:00 local (day-ahead) and D 08:00 local (morning-of). Each uses the latest
     run published by then, assuming NBM is out 90 min and GFS MOS 4 h after the run time.
   - NBM daily max/spread (`txn`/`xnd`) exist from 2020-09-30 (the NBM v4.0 upgrade). GFS MOS covers 2020→.
-- **M3** baseline / EMOS / quantile regression → bucket probabilities
+- **M3** baseline / EMOS / quantile regression → bucket probabilities ✅ (`reports/m3_models.md`)
+  - EMOS and QR beat raw NBM by 10–18% CRPS out-of-sample (2022-01 → 2026-11) and remove its +0.3–0.8°F warm bias.
 - **M4** verification (CRPS, RPS, Brier, log loss, PIT, reliability), time-based splits
 - **M5** model vs. market calibration + forward paper-trading log
