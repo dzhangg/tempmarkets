@@ -15,11 +15,11 @@ dependencies = [
   "requests",
   "pyyaml",
   "statsmodels",
+  "matplotlib",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest"]
-plots = ["matplotlib"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
