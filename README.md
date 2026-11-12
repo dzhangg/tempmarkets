@@ -68,7 +68,9 @@ all history, and appends bucket snapshots and hypothetical $1 trades (edge > 5¢
 after fees) to `paper_log/*.jsonl`. `scripts/paper_settle.py` scores them once markets resolve.
 Nothing in this repo places orders. Run both once or twice a day:
 ```bash
-.venv/bin/python scripts/paper_snapshot.py && .venv/bin/python scripts/paper_settle.py
+scripts/run_paper.sh            # one snapshot + settle cycle, logged to data/paper_job.log
+scripts/install_schedule.sh     # macOS: run it at 08:15 and 18:15 local time via launchd
 ```
+`paper_snapshot.py` needs `data/processed/features.parquet` (built by scripts 01–05).
 
 ![Edge calibration](reports/figures/m5_edge.png)
