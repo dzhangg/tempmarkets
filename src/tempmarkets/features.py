@@ -31,6 +31,16 @@ class Checkpoint:
 CHECKPOINTS = (Checkpoint("d1_1800", -1, 18), Checkpoint("d0_0800", 0, 8))
 
 
+@dataclass(frozen=True)
+class FixedCheckpoint:
+    """A checkpoint at a fixed instant (live use: 'now')."""
+    name: str
+    at_utc: pd.Timestamp
+
+    def utc(self, target: dt.date, tz: str) -> pd.Timestamp:
+        return self.at_utc
+
+
 def latest_available_run(runtimes: np.ndarray, delay: pd.Timedelta, cutoff: pd.Timestamp):
     """Latest runtime with runtime + delay <= cutoff (runtimes sorted ascending), or None."""
     i = np.searchsorted(runtimes, (cutoff - delay).to_datetime64(), side="right") - 1

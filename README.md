@@ -20,6 +20,8 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 | `05_build_features.py` | leak-free feature table + raw skill → `reports/m2_forecasts.md` | ~2 min |
 | `06_fit_models.py` | monthly-refit out-of-sample distributions (raw NBM, baseline, EMOS, QR) → `data/processed/predictions.parquet`, `reports/m3_models.md` | ~8 min |
 | `07_verify.py` | CRPS / log score / bucket Brier & log loss, PIT, reliability, bootstrap CIs → `reports/m4_verification.md`, `reports/figures/` | ~2 min |
+| `08_fetch_prices.py` | hourly CLOB price history for every bucket of every settled event → `data/raw/prices/` | ~45 min |
+| `09_market_compare.py` | model vs. market scores, edge calibration, hypothetical rule → `reports/m5_market.md` | ~2 min |
 
 Downloads are cached. Re-runs only re-fetch the current year.
 
@@ -49,4 +51,24 @@ Polymarket's rule text for these markets has three eras (confirmed for KMIA, KLG
   - EMOS/QR PIT is flat (12·Var 0.92–1.05); raw NBM is too narrow and warm-biased.
 
 ![PIT histograms](reports/figures/m4_pit.png)
-- **M5** model vs. market calibration + forward paper-trading log
+- **M5** model vs. market calibration + forward paper-trading log ✅ (`reports/m5_market.md`)
+  - **The market forecasts better than the model.** Log-loss skill vs. market, all stations:
+    day-ahead −5.6% [−10.9, −0.5], morning-of −20.6% [−26.1, −13.4]. By 08:00 the market has
+    overnight observations and newer guidance than the 06/07Z NBM run.
+  - **The model still carries some information.** Its disagreements with the market point the right way,
+    but only about a third of each edge is realised. A 50/50 log-blend roughly matches the market
+    day-ahead (+1.3% [−1.2, +3.6]) and beats it at KMIA (+4.3% [+0.5, +7.4]).
+  - **No evidence of a current edge.** A paper rule (buy the best-edge bucket when edge > 5¢ after an
+    assumed 1¢ half-spread and fees) looks profitable through mid-2026, but loses money in every era
+    since 2026-08-23 and is wiped out by a 2¢ half-spread. History prices aren't executable fills.
+
+## Paper-trading log (read-only)
+`scripts/paper_snapshot.py` reads live order books and the latest published NBM run, fits EMOS on
+all history, and appends bucket snapshots and hypothetical $1 trades (edge > 5¢ vs. the live best ask,
+after fees) to `paper_log/*.jsonl`. `scripts/paper_settle.py` scores them once markets resolve.
+Nothing in this repo places orders. Run both once or twice a day:
+```bash
+.venv/bin/python scripts/paper_snapshot.py && .venv/bin/python scripts/paper_settle.py
+```
+
+![Edge calibration](reports/figures/m5_edge.png)

@@ -98,5 +98,30 @@ def price_history(token: str, start_ts: int, end_ts: int, fidelity_min: int = 60
     return r.json().get("history", [])
 
 
+def price_history_cached(token: str, start_ts: int, end_ts: int, cache_dir, fidelity_min: int = 60) -> list[dict]:
+    """price_history with a per-token JSON cache (settled markets never change)."""
+    from pathlib import Path
+    path = Path(cache_dir) / f"{token}.json"
+    if path.exists():
+        return json.loads(path.read_text())
+    hist = price_history(token, start_ts, end_ts, fidelity_min)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(hist))
+    return hist
+
+
+def fee_schedule(ev: dict) -> dict:
+    """Taker fee schedule recorded on the event's markets (rate 0 if fees disabled).
+    Fee per trade = shares * rate * p * (1 - p) (docs.polymarket.com/trading/fees)."""
+    m = (ev.get("markets") or [{}])[0]
+    sch = m.get("feeSchedule") or {}
+    rate = float(sch.get("rate", 0) or 0) if m.get("feesEnabled") else 0.0
+    return {"rate": rate, "type": m.get("feeType")}
+
+
+def taker_fee_per_share(price: float, rate: float) -> float:
+    return rate * price * (1 - price)
+
+
 def order_book(token: str) -> dict:
     return get(f"{CLOB}/book", {"token_id": token}).json()

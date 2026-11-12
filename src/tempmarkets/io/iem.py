@@ -82,6 +82,19 @@ def mos_year(icao: str, model: str, year: int, refresh: bool = False,
     return df
 
 
+def mos_range(icao: str, model: str, start_utc: pd.Timestamp, end_utc: pd.Timestamp) -> pd.DataFrame:
+    """Recent runs (uncached) for live use, e.g. the last 2 days."""
+    params = {"station": icao, "model": model, "format": "csv",
+              "sts": start_utc.strftime("%Y-%m-%dT%H:%MZ"), "ets": end_utc.strftime("%Y-%m-%dT%H:%MZ")}
+    text = get(f"{IEM}/cgi-bin/request/mos.py", params, timeout=120).text
+    if not text.startswith("runtime"):
+        raise RuntimeError(f"IEM MOS {icao} {model}: {text[:120]!r}")
+    df = pd.read_csv(io.StringIO(text), low_memory=False)
+    df["runtime"] = pd.to_datetime(df["runtime"], utc=True)
+    df["ftime"] = pd.to_datetime(df["ftime"], utc=True)
+    return df
+
+
 def mos_run(icao: str, model: str, runtime_utc: str) -> pd.DataFrame:
     """One MOS/NBM run, e.g. model='NBS', runtime_utc='2025-07-01T13:00Z'."""
     js = get(f"{IEM}/api/1/mos.json", {"station": icao, "model": model, "runtime": runtime_utc}).json()
